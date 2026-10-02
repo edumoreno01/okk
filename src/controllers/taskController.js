@@ -1,0 +1,82 @@
+const taskModel = require('../models/taskModel');
+
+// GET /tasks - Listar todas as tarefas
+const getAllTasks = (req, res) => {
+   const tasks = taskModel.getAllTasks();
+   res.status(200).render("alltasks", {tasks});
+};
+
+// GET /tasks/:id - Obter uma tarefa específica
+const getTaskId = (req, res) => {
+   const id = parseInt(req.params.id);
+   const task = taskModel.getTaskId(id);
+
+   if (!task) {
+      // status é fundamental na API RESTful - código padronizado, confiável e profissional
+      // define o código status HTTP que será enviado junto com a resposta
+      /* Códigos HTTP
+         200 OK -> requisição bem-sucedida (GET, PUT, DELETE bem feitos)
+         201 Created -> Recurso criado com sucesso (POST)
+         204 No Content -> Exclusão bem-sucedida, sem corpo de resposta
+         400 Bad request -> Cliente enviou dados inválidos
+         404 Not found -> Recurso não encontrado
+         500 Internet Server Error -> Erro inesperado no servidor
+      */
+      return res.status(404).json({ erro: 'Tarefa não encontrada' });
+   }
+   res.json(task);
+}
+
+// GET /tasks/tasksCompleted - Listar as tarefas Feitas
+const getTaskCompleted = (req, res) => {
+   const tasks = taskModel.getCompleted();
+   res.status(200).json(tasks);
+};
+
+// POST /tasks/create - Criar uma nova tarefa
+const createTask = (req, res) => {
+   req.body.completed = Number(req.body.completed); 
+   const createtask = taskModel.createTask(req.body);
+   res.redirect('/tasks');
+};
+
+// POST /tasks/deletar - Deletar uma tarefa
+const deleteTask = (req, res) => {
+   const taskdeletada = taskModel.deleteTask(req.body.id);
+   if (!taskdeletada) {
+      return res.status(404).json({ erro: 'Tarefa não encontrada' });
+   }
+   res.redirect('/tasks');
+};
+
+const deleteAll = (req, res) => {
+   const Alldelete = taskModel.deleteAll();
+   res.redirect('/tasks');
+}
+
+const filtrarTask = (req, res) => {
+   req.body.completed = Number(req.body.completed);
+   const filtrados = taskModel.filtrarTask(req.body.completed);
+   res.redirect('/tasks');
+}
+
+// POST /tasks/atualizar - Atualizar uma tarefa
+const atualizarTask = (req, res) => {
+   req.body.completed = Number(req.body.completed);
+   const taskatualizada = taskModel.atualizarTask(req.body);
+   if (!taskatualizada) {
+      return res.status(404).json({ erro: 'Tarefa não encontrada' });
+   }
+   res.redirect('/tasks');
+};
+
+module.exports = {
+   getAllTasks,
+   getTaskId,
+   getTaskCompleted,
+   createTask,
+   deleteTask,
+   atualizarTask,
+   deleteAll,
+   filtrarTask
+};
